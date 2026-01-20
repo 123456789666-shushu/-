@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>心桥</h1>
+    <p>欢迎来到心桥，分享您的故事和感受</p>
+    
+    {% if posts %}
+        {% for post in posts %}
+            <div class="card post">
+                <div class="post-header">
+                    <img src="{{ url_for('static', filename='profile_pics/' + post.author.avatar) }}" alt="头像" class="avatar">
+                    <div>
+                        <span class="{{ 'parent-nickname' if post.author.role == 'parent' else 'child-nickname' }}">
+                            {{ post.author.nickname }}
+                        </span>
+                        <span>({{ '家长' if post.author.role == 'parent' else '孩子' }})</span>
+                        <div class="post-date">{{ post.date_posted.strftime('%Y-%m-%d %H:%M') }}</div>
+                    </div>
+                </div>
+                <h2 class="post-title">{{ post.title }}</h2>
+                <div class="post-content">{{ post.content }}</div>
+                <a href="{{ url_for('post', post_id=post.id) }}" class="btn">查看详情和评论</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <p>还没有帖子，快来发布第一个帖子吧！</p>
+        </div>
+    {% endif %}
+{% endblock %}

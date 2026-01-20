@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="card post">
+        <div class="post-header">
+            <img src="{{ url_for('static', filename='profile_pics/' + post.author.avatar) }}" alt="头像" class="avatar">
+            <div>
+                <span class="{{ 'parent-nickname' if post.author.role == 'parent' else 'child-nickname' }}">
+                    {{ post.author.nickname }}
+                </span>
+                <span>({{ '家长' if post.author.role == 'parent' else '孩子' }})</span>
+                <div class="post-date">{{ post.date_posted.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+        </div>
+        <h2 class="post-title">{{ post.title }}</h2>
+        <div class="post-content">{{ post.content }}</div>
+        
+        {% if current_user.is_developer %}
+            <div class="admin-section">
+                <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn btn-danger" onclick="return confirm('确定要删除这篇帖子吗？');">删除帖子</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <h3>评论 ({{ post.comments|length }})</h3>
+    
+    {% if current_user.is_authenticated %}
+        <div class="card">
+            <h4>添加评论</h4>
+            <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
+                <div class="form-group">
+                    <label for="content">评论内容</label>
+                    <textarea id="content" name="content" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn">发布评论</button>
+            </form>
+        </div>
+    {% else %}
+        <div class="card">
+            <p>请先<a href="{{ url_for('login') }}">登录</a>后再评论</p>
+        </div>
+    {% endif %}
+    
+    {% if post.comments %}
+        {% for comment in post.comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <img src="{{ url_for('static', filename='profile_pics/' + comment.author.avatar) }}" alt="头像" class="avatar" style="width: 30px; height: 30px;">
+                    <span class="{{ 'parent-nickname' if comment.author.role == 'parent' else 'child-nickname' }}">
+                        {{ comment.author.nickname }}
+                    </span>
+                    <span>({{ '家长' if comment.author.role == 'parent' else '孩子' }})</span>
+                    <div class="comment-date">{{ comment.date_posted.strftime('%Y-%m-%d %H:%M') }}</div>
+                </div>
+                <div class="comment-content">{{ comment.content }}</div>
+                
+                {% if current_user.is_developer or current_user == comment.author %}
+                    <div class="admin-section">
+                        <a href="{{ url_for('delete_comment', comment_id=comment.id) }}" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="return confirm('确定要删除这条评论吗？');">删除评论</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <p>还没有评论，快来发表第一个评论吧！</p>
+        </div>
+    {% endif %}
+{% endblock %}
